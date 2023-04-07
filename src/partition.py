@@ -2,20 +2,48 @@
 # author:     Sourabh Bhat <heySourabh@gmail.com>
 
 from typing import Union
+from matplotlib import pyplot as plt
 import numpy as np
 
 
 def main():
-    dims = 3
-    num_points = 5
-    min_coord = -5
+    dims = 2
+    num_points = 10
+    min_coord = -2
     max_coord = 5
-    point_array = max_coord * np.random.random_sample((num_points, dims)) - min_coord
-    point_array[:, 1] = 0.0
+    np.random.seed(123)
+    point_array = (max_coord - min_coord) * np.random.random_sample((num_points, dims)) + min_coord
     points = [Point(p) for p in point_array]
 
     root = build_tree(points)
-    print_tree(root)
+
+    # --- Visualization code below this line ---
+    def z(x, y):
+        p = np.zeros(dims)
+        p[:2] = x, y
+        return points.index(root.search(Point(p)).point)
+
+    X, Y = np.meshgrid(np.linspace(min_coord, max_coord, 500),
+                       np.linspace(min_coord, max_coord, 500))
+    Z = np.zeros_like(X)
+    for i in range(len(X)):
+        for j in range(len(X[i])):
+            x = X[i, j]
+            y = Y[i, j]
+            Z[i, j] = z(x, y)
+
+    levels = np.linspace(0, 30, min(30+1, 100)) - 0.5
+    plt.contourf(X, Y, Z, levels=levels, cmap="turbo")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    cb = plt.colorbar(label="point index")
+    cb.set_ticks((cb.get_ticks()+0.5)[:-1])
+    cb.set_ticklabels(np.array(cb.get_ticks(), dtype=int))
+    plt.gca().set_aspect("equal")
+    plt.scatter(point_array[:, 0], point_array[:, 1], s=max(500/num_points, 1))
+    plt.savefig(f"points_{num_points:06d}.png")
+    plt.show()
+    plt.clf()
 
 
 overlap_eps = 1e-12
