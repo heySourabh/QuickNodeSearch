@@ -8,7 +8,7 @@ import numpy as np
 
 def main():
     dims = 2
-    num_points = 10
+    num_points = 20
     min_coord = -2
     max_coord = 5
     np.random.seed(123)
