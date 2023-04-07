@@ -41,7 +41,7 @@ def main():
     cb.set_ticklabels(np.array(cb.get_ticks(), dtype=int))
     plt.gca().set_aspect("equal")
     plt.scatter(point_array[:, 0], point_array[:, 1], s=max(500/num_points, 1))
-    plt.savefig(f"points_{num_points:06d}.png")
+    plt.savefig(f"partitions_{num_points}_points.png")
     plt.show()
     plt.clf()
 
