@@ -32,7 +32,7 @@ def main():
             y = Y[i, j]
             Z[i, j] = z(x, y)
 
-    levels = np.linspace(0, 30, min(30+1, 100)) - 0.5
+    levels = np.linspace(0, num_points, min(num_points+1, 100)) - 0.5
     plt.contourf(X, Y, Z, levels=levels, cmap="turbo")
     plt.xlabel("x")
     plt.ylabel("y")
