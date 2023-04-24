@@ -8,11 +8,12 @@ import numpy as np
 
 def main():
     dims = 2
-    num_points = 20
+    num_points = 100
     min_coord = -2
     max_coord = 5
     np.random.seed(123)
-    point_array = (max_coord - min_coord) * np.random.random_sample((num_points, dims)) + min_coord
+    point_array = (max_coord - min_coord) * \
+        np.random.random_sample((num_points, dims)) + min_coord
     points = [Point(p) for p in point_array]
 
     root = build_tree(points)
@@ -41,7 +42,7 @@ def main():
     cb.set_ticklabels(np.array(cb.get_ticks(), dtype=int))
     plt.gca().set_aspect("equal")
     plt.scatter(point_array[:, 0], point_array[:, 1], s=max(500/num_points, 1))
-    plt.savefig(f"partitions_{num_points}_points.png")
+    plt.savefig(f"unaligned_partitions_{num_points}_points.png")
     plt.show()
     plt.clf()
 
@@ -58,7 +59,7 @@ class Point:
 
 
 class Split:
-    def __init__(self, direction: int, location: float) -> None:
+    def __init__(self, direction: np.ndarray, location: np.ndarray) -> None:
         self.direction = direction
         self.location = location
 
@@ -82,13 +83,14 @@ class Cell:
         if self.children == None:
             p1 = point.coordinates
             p2 = self.point.coordinates
-            distance = np.abs(p1[:] - p2[:])
-            if np.sum(distance**2) < overlap_eps:
+            split_direction = p1 - p2
+            if np.sum(split_direction**2) < overlap_eps:
                 raise ValueError("Overlapping / almost overlapping points.")
-            split_direction = int(np.argmax(distance))
-            split_location = (p1[split_direction] + p2[split_direction]) / 2
+            split_location = (p1 + p2) / 2
             split = Split(split_direction, split_location)
-            if p1[split_direction] < split_location:
+            vec = p1 - split_location
+            side = vec.dot(split_direction)
+            if side < 0:
                 left = Cell(point)
                 right = Cell(self.point)
             else:
@@ -99,7 +101,9 @@ class Cell:
             split = self.children.split
             split_direction = split.direction
             split_location = split.location
-            if point.coordinates[split_direction] < split_location:
+            vec = point.coordinates - split_location
+            side = vec.dot(split_direction)
+            if side < 0:
                 self.children.left.add_point(point)
             else:
                 self.children.right.add_point(point)
@@ -111,7 +115,9 @@ class Cell:
             split = self.children.split
             split_direction = split.direction
             split_location = split.location
-            if point.coordinates[split_direction] < split_location:
+            vec = point.coordinates - split_location
+            side = vec.dot(split_direction)
+            if side < 0:
                 return self.children.left.search(point)
             else:
                 return self.children.right.search(point)
